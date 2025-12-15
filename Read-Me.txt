@@ -1,0 +1,144 @@
+quero criar um bot de moderação via log para o discord
+
+vai funcionar da seguinte forma 
+
+o sistema do bot vai ler as mensagens de todos os usuários em todos os canais e vai salvar no database.db com timestamp e todos os dados, até imagem enviada
+
+vai salvando tudo no database
+
+vai ter varios comandos como:
+
+/view @user - manda um embed contendo tudo sobre esse usuário como: quantidade de mensagens que ele ja enviou na guild, quanto tempo ele já está na guild com base no timestamp de quanod ele entrou que fica salvo, etc
+
+/viewlog @user - verifica as mensagens do usuário em formato de transcript igual um transcript de ticket igual eu mandei esse zip que contem um arquivo com codigo que faz esse transcript
+
+se mandar so o arquivo com @user vai apenas mandar as mensagens do usuário 
+
+no transcript vai conter separando entre os canais
+
+e tem o time-from e time_end que vai dar pra colocar ou time que nos primeiros colocamos uma data como dd/mm/aaaa e no segundo tambem, já no time colocamos um tempo como 9h e vai aparecer mensagens no transcript desse tempo de intervalo ou por exemplo 9h atrás até a última mensagem do database na hora do request
+
+limita para 8mb no máximo de transcript, depois envia em ephemeral o arquivo pra quem solicitou isso
+
+se colocar o #channel junto como argumento ai ele manda só as logs referentes ao chat selecionada do usuário
+
+tem o comando /adv @user - vai dar uma advertência para o usuário com a seguinte funcionalidade:
+
+/advrole-one @role - adiciona a role referente a adv 1
+/advrole-two @role - adiciona a referente a adv2
+/advrole-two @role - adiciona a referente a adv3
+/banrole @role - adiciona a role de banido
+
+se dar /adv @user ele vai dar a role 1 de advertência para o usuário e deixa salvo com timestamp no database, após 7 dias da adição da última advertência aplicada, remove todas (o timestamp atualiza para o momento atual caso ganhe outra adv, fazendo sempre demorar 7 dias para remover todas automaticamente)
+
+coloca um timer de 5 minutos que roda sempre a cada 5 minutos e verifica todos os eventos timers do projeto como esse de adv
+
+/staffrole-add @role - add staff
+/staffrole-remove @role - remove staff
+comandos para adicionar staffs que podem executar todos esses comandos de advertir e ver logs
+
+se o usuário tiver 3 advertências e receber mais uma com comando, ele ganha a tag ban-tag e não sai mais depois de 7 dias, vai ser necessário um staff remover
+
+/adv-remove @user - remove uma adv do usuário
+
+/unban @user - remove a role de ban do usuário
+
+/bail - o usuário paga em coins o valor da adv e a adv sai dele de acordo com o preço definido da guild
+
+/card - salva o coin card pra guild receber coins para fazer essas coisas como pagamentos de multas e bail para remover adv
+
+/bailworth - define valor a pagar para remover cada adv (o preço é vezes a quantia de adv recebida, se tiver 3 vai ser o valor vezes 3)
+
+mandei os arquivos da api para tu saber os endpoints a serem usados para pagamentos via card (/api/card/pay pelo que sei)
+
+/invoice @user valor - aplica uma multa para o usuário que ele vai ter que pagar junto para remover ADVs
+
+/payinvoice - comando para fazer pagamento de invoice (multa)
+
+os comandos de pagamentos todos vão abrir modal de colocar o cardID coin para efetuar a cobrança
+
+/log canal - define canal de log na guild
+
+/revoke canal - define canal para exibir mensagens deletadas por usuário e canal onde a mensagem foi enviada antes de apagar
+se um usuário manda mensagem e apaga, a mensagem é automaticamente mandada nesse canal em um embed mostrando o usuário, o conteúdo (inclui imagem / arquivo se menor que 8mb) e canal onde a mensagem estava (mensagens apagadas não saem da log visivel via /view)
+
+todos os comandos precisam ser executados por adm da guild ou por quem tem a role configurada como staff na guild no database
+
+as logs mais antigas que 30 dias são deletadas automaticamente (de 5 em 5 minutos verifica isso para ir prunando o database)
+
+vai der o /pannel também que define o canal onde vai ser enviado um embed de adm com 3 botões
+
+1 é de paybail que vai abrir o modal de pagar normal
+o info que vai exibir informações sobre esse usuário que clicou como mensagens, advs, histórico, multa e etc
+terceiro é o de remover adv, abre o modal também de pagamento para remover adv após pagar e confirmar pagamento na api coin
+
+quero também um sistema de palavras proibidas 
+
+algo como /denyword-add palavra /denyword-remove palavra - que vai adicionar ou remover na guild no database uma palavra na lista, todas as mensagens enviadas são verificadas se tem essa palavra
+
+caso uma mensagem seja enviada contendo essa palavra a mensagem é automaticamente apagada e aparece log disso no canal de log e a pessoa recebe aviso na dm e fica salvo isso como adv sem role, caso o usuário volte a enviar palavras proibidas, recebe uma adv e o resto acontece igual, aviso, dm, log, etc e adiciona mais 1% do valor de multa que a pessoa já tem para ela, piorando a situação dela de multa
+
+o sistema vai salvar tudo, até advs recebidas para mostrar no comando do usuário e também se ele clicar lá no botão para ver seus dados, vai mostrar advs atuais e também a quantidade total de adv já aplicadas nesse usuário 
+
+e um sistema de reputação
+
+com /negative @user - da um voto negativo no usuário e salva isso com timestamp (cada usuário só pode votar em um usuário negativo ou positivo uma vez a cada 1h)
+
+e /positive @user - para dar ponto positivo com voto
+
+o ponto negativo retira 5 pontos de reputação
+
+o positivo dá 5 pontos
+
+cada mensagem enviada sem erros e sem palavra proibida da 2 pontos de reputação para o usuário, mas só pode receber uma vez a cada 5 minutos (se mandar várias não funciona, o sistema usa a log e timestamp para checar qual foi a ultima vez que o usuario mandou mensagem)
+e isso vale para call, se o usuario estiver em chat de voz, a cada 5 minutos ele recebe 2 pontos de reputação só por estar ativo
+
+tem o /rep @user ou só /rep (se for sem @ mostra o seu, com @ mostra o rep da pessoa marcada) que vai mostrar a pontuação de reputação
+
+para cada mensagem que for deletada, perde 1 ponto de reputação, e para cada mensagem que conter uma mensagem proibida, perde 5 pontos de reputação (se tiver mais palavras proibidas na mesma mensagem, aplica mais percas de reputação)
+
+cada advertêmncia recebida perde 10 pontos de reputação
+
+a reputação pode ficar em -1000 e +1000 no máximo, e sempre inicia em 0 para cada novo usuário na guild (se sair da guild perde 100 pontos de rep)
+
+a reputação é o único dado do usuário que não deleta após 30 dias
+
+pagar multas e pagar para remover adv faz ganhar 5 pontos de reputação para cada um pagamento
+
+ao usar palavras proibidas o bot dá timeout no usuário por 1min
+
+ao receber adv, o usuário fica em timeout por 5 min
+
+tem o comando para staff de /timeout @user tempo (exemplo: 1h) que faz o bot dar timeout no usuário pelo tempo definido
+
+o timeout da uma multa no usuário definido em /timeout-worth valor - que o usuário recebe essa multa automaticamente ao ser timeout
+
+tem também o /advworth - define o preço de multa que o usuário recebe para cada adv que ele recebe
+
+tem o /unbanworth - define o preço de multa a pagar que o usuário recebe ao ser banido (por 3 adv ou ban por comando)
+
+ao pagar as multas o timeout sai automaticamente (as adv não, só pagando por adv msm)
+
+todos os valores são truncados na oitava casa decimal para ser compatível com o projeto coin
+
+se o usuário for banido literalmente da guild, ele recebe no dm no privado contendo um embed com o motivo do ban e um botão em baixo em verde chamado UNBAN que vai abrir um modal de pagamento com o preço definido para pagar e ser automaticamente desbanido da guild (sai da lista de ban da guild e pode entrar novamente com link de conivte)
+
+após ser desbanido o bot envia confirmando que foi desbanido e um link de convite da guild que foi desbanido
+
+para isso funcionar, vai ter uma banlist no database e os preços
+
+e por último o comando /permban @user valor_unban motivo - bane o usuário com os detalhes que expliquei acima
+
+e de brinde o comando /invite link - que vai salvar esse link no database para ser o link de convite da guild (é recomendado ser um link permanente) que é enviado caso o usuário pague o unban na dm
+
+para garantir que a dm envie, é necessário que a mensagem na dm de ban seja enviada antes do ban realmente ser realizado, pois pode ser que o usuário só receba mensagem de quem está nas mesmas guilds que ele, então é bom garantir isso com um certo delay entre enviar a mensagem e banir definitivavemte com esse comando
+
+faça o bot 100% funcional, robusto e bem funcional
+
+e me envie tido em um só index.js
+
+deixe o projeto mais funcional possível e 100% top
+
+os comandos são registrados no global ao iniciar o bot
+
+me envie o código 100% completo por escrito
